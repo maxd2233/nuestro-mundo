@@ -3,6 +3,7 @@ import Chest from "./components/Chest"
 import Gallery from "./components/Gallery"
 import Letter from "./components/Letter"
 import Footer from "./components/Footer"
+import MusicPlayer from "./components/MusicPlayer"
 
 export default function App() {
   const galleryRef = useRef(null)
@@ -21,6 +22,7 @@ export default function App() {
       </div>
       <Letter />
       <Footer />
+      <MusicPlayer />
     </>
   )
 }
