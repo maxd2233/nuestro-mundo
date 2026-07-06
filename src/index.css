@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@theme {
+  --font-pixel: "Press Start 2P", system-ui, monospace;
+  --color-chest: #8B5E3C;
+  --color-chest-dark: #5C3A1E;
+  --color-chest-light: #B8865A;
+  --color-chest-latch: #7A7A7A;
+  --color-pixel-heart: #FF4D6D;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 10px;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  font-family: "Press Start 2P", system-ui, monospace;
+  font-size: 10px;
+  color: #e0e0e0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #3D2010;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, #2D1810 31px, #2D1810 32px),
+    repeating-linear-gradient(90deg, transparent, transparent 31px, #2D1810 31px, #2D1810 32px),
+    radial-gradient(2px 2px at 8% 12%, #5C3A1E, transparent),
+    radial-gradient(3px 3px at 22% 68%, #4A2A16, transparent),
+    radial-gradient(2px 2px at 48% 25%, #5C3A1E, transparent),
+    radial-gradient(2px 2px at 72% 72%, #4A2A16, transparent),
+    radial-gradient(3px 2px at 92% 18%, #5C3A1E, transparent),
+    radial-gradient(2px 2px at 18% 42%, #7A4E2E, transparent),
+    radial-gradient(2px 2px at 38% 88%, #7A4E2E, transparent),
+    radial-gradient(2px 2px at 62% 8%, #7A4E2E, transparent),
+    radial-gradient(2px 2px at 82% 55%, #7A4E2E, transparent);
+  background-size: 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px, 32px 32px;
+}
+
+/* Custom Minecraft scrollbar */
+::-webkit-scrollbar {
+  width: 14px;
+}
+::-webkit-scrollbar-track {
+  background: #1a120e;
+  border: 2px solid #2D1810;
+}
+::-webkit-scrollbar-thumb {
+  background: #8B6914;
+  border: 2px solid #5C3A1E;
+  box-shadow:
+    1px 1px 0 0 #A07816 inset,
+    -1px -1px 0 0 #4A2A16 inset;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A07816;
+}
+
+/* Pixel blink animation */
+@keyframes pixel-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.animate-pixel-blink {
+  animation: pixel-blink 1s step-end infinite;
+}
+
+/* Minecraft-style pixel borders using stepped box-shadow */
+.pixel-b {
+  box-shadow:
+     2px 0 0 0 var(--bc, #2D1810),
+     0 2px 0 0 var(--bc, #2D1810),
+    -2px 0 0 0 var(--bc, #2D1810),
+     0 -2px 0 0 var(--bc, #2D1810),
+     1px 1px 0 0 var(--bc, #2D1810),
+    -1px -1px 0 0 var(--bc, #2D1810),
+     1px -1px 0 0 var(--bc, #2D1810),
+    -1px 1px 0 0 var(--bc, #2D1810);
+}
+
+/* 3D Minecraft UI border (lighter top-left, darker bottom-right) */
+.pixel-b-3d {
+  box-shadow:
+     2px 0 0 0 var(--bc, #2D1810),
+     0 2px 0 0 var(--bc, #2D1810),
+    -2px 0 0 0 var(--bc, #2D1810),
+     0 -2px 0 0 var(--bc, #2D1810),
+     1px 1px 0 0 var(--bc, #2D1810),
+    -1px -1px 0 0 var(--bc, #2D1810),
+     1px -1px 0 0 var(--bc, #2D1810),
+    -1px 1px 0 0 var(--bc, #2D1810),
+    inset 1px 1px 0 0 var(--bcl, #7A4E2E),
+    inset -1px -1px 0 0 var(--bcd, #1a0a05);
+}
+
+/* Section overlay to let background pattern show subtly */
+.section-panel {
+  background-color: rgba(15, 15, 26, 0.85);
+}
+
+/* Card inner shadow for depth */
+.card-depth {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
