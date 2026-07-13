@@ -1,6 +1,8 @@
-import { useState, useCallback } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { moments, finalMessage } from "../data/moments"
+import EnchantmentTable from "./EnchantmentTable"
+import PixelBanners from "./PixelBanners"
 
 const baseUrl = import.meta.env.BASE_URL
 
@@ -61,6 +63,9 @@ export default function Gallery() {
         <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-dirt" style={{ boxShadow: "1px 0 0 0 #6B4A0A, 0 1px 0 0 #6B4A0A, -1px 0 0 0 #6B4A0A, 0 -1px 0 0 #6B4A0A" }} />
         <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-stone" style={{ boxShadow: "1px 0 0 0 #5C5C5C, 0 1px 0 0 #5C5C5C, -1px 0 0 0 #5C5C5C, 0 -1px 0 0 #5C5C5C" }} />
       </div>
+
+      {/* Pixel banners */}
+      <PixelBanners />
 
       {/* Grid: 2 cols mobile, 3 desktop */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
@@ -131,6 +136,9 @@ export default function Gallery() {
           </motion.article>
         ))}
       </div>
+
+      {/* Enchantment table decoration */}
+      <EnchantmentTable />
 
       {/* Final message */}
       <motion.div

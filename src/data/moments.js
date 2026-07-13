@@ -151,6 +151,22 @@ export const moments = [
     photos: ["momento 19.jpeg"],
     emoji: "☀️",
   },
+  {
+    id: 20,
+    date: "Días difíciles",
+    title: "Días difíciles",
+    description: "Los días difíciles también se pasan juntos, y eso hace que todo valga la pena. Cada abrazo tuyo en los malos momentos me recuerda por qué te elegí.",
+    photos: ["momento 20.jpeg"],
+    emoji: "🌧️",
+  },
+  {
+    id: 21,
+    date: "Cuartos de final con choripan",
+    title: "Cuartos de final con choripan",
+    description: "Otro mundialito juntos, un finde mas juntos de compartir y tener momentos unicos (experiencias nuevas).",
+    photos: ["Momento 21.jpeg", "momento 21.1.jpeg"],
+    emoji: "⚽",
+  },
 ]
 
 export const finalMessage =
