@@ -167,6 +167,32 @@ export const moments = [
     photos: ["Momento 21.jpeg", "momento 21.1.jpeg"],
     emoji: "⚽",
   },
+  {
+    id: 22,
+    date: "18/07/26",
+    title: "Sábado Especial",
+    description: "No pude aguantar más y terminé pidiéndote ser mi novio. Tomamos matecitos con el bizcochuelo de limón más rico que probé en su vida (se chupó los dedos). Te elegí y te voy a elegir siempre, hermoso. Te amo. Al fin novios 💕",
+    photos: ["Momento 22.jpg", "Momento 23.jpg"],
+    emoji: "💕",
+    special: true,
+  },
+  {
+    id: 23,
+    date: "25/07/26",
+    title: "Novios al cuadrado",
+    description: "Me hiciste tu propuesta de novios al cuadrado, con mis sorrentinos favs y un vinito. Te amo novio mio (Yo gane igual). Gracias por todo, por tus regalos, por tu cariño y todo el amor que me das y demostras dia a dia. Realmente te eligiria hoy y siempre <3",
+    photos: ["Momento 26.jpeg", "Momento 25.jpeg"],
+    emoji: "💍",
+    special: true,
+  },
+  {
+    id: 24,
+    date: "Tarde de solcito",
+    title: "Una tarde en la plaza Haimes",
+    description: "Te acompañe a hacer tus cosas y fuimos por un helado en grido (nos atendio una cara de orto).Estuvimos tirados en el solcito, me encanta pasar el tiempo con vos, me encantas vos, me encantan tus ojos y lo hermoso que sos. Me encanta mirar esos ojitos que se volvieron mis favoritos y ojala me miren siempre <3",
+    photos: ["Momento 29.jpeg", "Momento 28.jpeg", "Momento 27.jpeg"],
+    emoji: "🍦",
+  },
 ]
 
 export const finalMessage =

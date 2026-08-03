@@ -108,3 +108,36 @@ body {
 .card-depth {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
+
+/* Special card golden glow pulse */
+@keyframes golden-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.4), 0 0 16px rgba(255,215,0,0.2), 0 0 0 2px rgba(255,215,0,0.5); }
+  50% { box-shadow: 0 0 16px rgba(255,215,0,0.7), 0 0 32px rgba(255,215,0,0.35), 0 0 0 2px rgba(255,215,0,0.8); }
+}
+.special-glow {
+  animation: golden-glow 2.5s ease-in-out infinite;
+  position: relative;
+}
+
+/* Floating heart badge */
+@keyframes float-heart {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.1); }
+}
+.float-heart {
+  animation: float-heart 2s ease-in-out infinite;
+}
+
+/* Sparkle particles */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+.sparkle-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #FFD700;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  pointer-events: none;
+}

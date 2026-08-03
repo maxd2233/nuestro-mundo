@@ -45,6 +45,34 @@ function PhotoBlock({ photos, alt, emoji, index }) {
   )
 }
 
+function Sparkles() {
+  const particles = [
+    { top: "8%", left: "15%", delay: "0s", size: 4 },
+    { top: "5%", left: "75%", delay: "0.6s", size: 3 },
+    { top: "20%", left: "85%", delay: "1.2s", size: 4 },
+    { top: "35%", left: "10%", delay: "0.3s", size: 3 },
+    { top: "15%", left: "50%", delay: "1.8s", size: 4 },
+    { top: "25%", left: "30%", delay: "0.9s", size: 3 },
+  ]
+  return (
+    <>
+      {particles.map((p, i) => (
+        <div
+          key={i}
+          className="sparkle-particle"
+          style={{
+            top: p.top,
+            left: p.left,
+            width: p.size,
+            height: p.size,
+            animation: `sparkle 2s ease-in-out ${p.delay} infinite`,
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 export default function Gallery() {
   return (
     <section id="galeria" className="section-panel min-h-screen py-16 md:py-24 px-4">
@@ -72,7 +100,7 @@ export default function Gallery() {
         {moments.map((moment, i) => (
           <motion.article
             key={moment.id}
-            className="group cursor-default relative"
+            className={`group cursor-default relative ${moment.special ? "special-glow" : ""}`}
             variants={cardVariants}
             initial="offscreen"
             whileInView="onscreen"
@@ -83,8 +111,9 @@ export default function Gallery() {
             <div
               className="bg-[#1D1D1D] overflow-hidden transition-all duration-300 group-hover:-translate-y-1"
               style={{
-                boxShadow:
-                  "3px 0 0 0 #2D2D2D, 0 3px 0 0 #2D2D2D, -3px 0 0 0 #2D2D2D, 0 -3px 0 0 #2D2D2D, 2px 1px 0 0 #2D2D2D, 1px 2px 0 0 #2D2D2D, -2px 1px 0 0 #2D2D2D, -1px 2px 0 0 #2D2D2D, 2px -1px 0 0 #2D2D2D, 1px -2px 0 0 #2D2D2D, -2px -1px 0 0 #2D2D2D, -1px -2px 0 0 #2D2D2D, inset 1px 1px 0 0 #4A4A4A, inset -1px -1px 0 0 #111",
+                boxShadow: moment.special
+                  ? undefined
+                  : "3px 0 0 0 #2D2D2D, 0 3px 0 0 #2D2D2D, -3px 0 0 0 #2D2D2D, 0 -3px 0 0 #2D2D2D, 2px 1px 0 0 #2D2D2D, 1px 2px 0 0 #2D2D2D, -2px 1px 0 0 #2D2D2D, -1px 2px 0 0 #2D2D2D, 2px -1px 0 0 #2D2D2D, 1px -2px 0 0 #2D2D2D, -2px -1px 0 0 #2D2D2D, -1px -2px 0 0 #2D2D2D, inset 1px 1px 0 0 #4A4A4A, inset -1px -1px 0 0 #111",
               }}
             >
               {/* Photo area: 60% of card height */}
@@ -92,6 +121,18 @@ export default function Gallery() {
                 <div className="absolute inset-0">
                   <PhotoBlock photos={moment.photos} alt={moment.title} emoji={moment.emoji} />
                 </div>
+
+                {/* Floating heart badge for special moment */}
+                {moment.special && (
+                  <div className="absolute top-2 right-2 float-heart z-10">
+                    <div className="bg-[#1D1D1D]/80 rounded-sm px-1.5 py-1" style={{ boxShadow: "1px 0 0 0 #2D2D2D, 0 1px 0 0 #2D2D2D, -1px 0 0 0 #2D2D2D, 0 -1px 0 0 #2D2D2D" }}>
+                      <span className="text-sm md:text-base">💕</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sparkle particles for special moment */}
+                {moment.special && <Sparkles />}
               </div>
 
               {/* Secondary photo thumbnails */}
