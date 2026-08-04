@@ -193,6 +193,14 @@ export const moments = [
     photos: ["Momento 29.jpeg", "Momento 28.jpeg", "Momento 27.jpeg"],
     emoji: "🍦",
   },
+  {
+    id: 25,
+    date: "Día entero juntos",
+    title: "Un Dia Conmigo",
+    description: "Literalmente un dia conmigo, almorzamos con mi flia(les caes muy bien). Trabajamos como negros ahre y tomi te miraba con cara de incomodo. finalmente merendamos y nos abrazamos muchote. De nuevo te amo tris, Gracias por todo <3",
+    photos: ["Momento 30.jpeg", "Momento 31.jpeg"],
+    emoji: "🤗",
+  },
 ]
 
 export const finalMessage =
