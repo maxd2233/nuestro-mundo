@@ -201,6 +201,22 @@ export const moments = [
     photos: ["Momento 30.jpeg", "Momento 31.jpeg"],
     emoji: "🤗",
   },
+  {
+    id: 26,
+    date: "Nuestro primer mes",
+    title: "Copito",
+    description: "Nuestro primer mes piojito, ese día viniste a casa, compartiste con todos en el almuerzo. Esa tarde apareció Copito, nuestro bebé je. Desde ese momento dejó de ser un peluche, Copito es un pedacito de nosotros, un pedacito de nuestro amor, de un recuerdo y de todo lo lindo que estamos empezando a construir. Quizás para los demás sea un simple peluche pero para mí Copito representará todo tu amor, te amo <3",
+    photos: ["momento 32.jpeg"],
+    emoji: "🧸",
+  },
+  {
+    id: 27,
+    date: "Un día de nosotros",
+    title: "Un día de nosotros",
+    description: "Un día que tuvo un poco de todo. Empezó entre cambios de planes, comida juntos y después un viaje a Tucumán para acompañarte a una charla a la que me invitaste, sabiendo lo mucho que podía ayudarme con mi proyecto.\n\nDespués, una merienda hermosa, fotos, risas y tiempo juntos. Pero también una pelea, una noche enojados y cosas que necesitábamos decirnos.\n\nNo fue un día perfecto, pero terminamos hablando, entendiendo un poco más al otro y poniendo límites para seguir construyendo lo nuestro.\n\nPorque supongo que también se trata de eso: no solo de los días lindos, sino de aprender a encontrarnos incluso cuando las cosas se complican. ❤️",
+    photos: ["momento 33.jpeg", "momento 34.jpeg"],
+    emoji: "❤️",
+  },
 ]
 
 export const finalMessage =
