@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { playPageFlipSound } from "../utils/audioEffects"
 
 const fullText = `Armé este mundito con fotos nuestras porque quería que tuvieras un lugar donde guardar lo que sentimos, algo que puedas volver a abrir cuando quieras.
 
@@ -13,37 +14,17 @@ Te elijo de vuelta, las veces que sean necesarias.`
 
 function QuillIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" className="inline-block align-middle">
-      <rect x="7" y="1" width="2" height="10" fill="#D4A537" />
-      <rect x="6" y="11" width="4" height="2" fill="#8B6914" />
-      <rect x="7" y="13" width="2" height="2" fill="#2D1810" />
-      <rect x="8" y="0" width="1" height="1" fill="#FFD700" />
+    <svg width="20" height="20" viewBox="0 0 20 20" className="inline-block align-middle">
+      <path
+        d="M17 2C17 2 13 4 10 9C8.5 11.5 8 14 8 14L6 17L9 15C9 15 11.5 14.5 14 13C19 10 21 6 21 6C21 6 18 6 15 8"
+        stroke="#D4A537"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <circle cx="5" cy="18" r="1.5" fill="#8B6914" />
     </svg>
-  )
-}
-
-function BookCover({ isOpen }) {
-  return (
-    <motion.div
-      className="absolute top-0 left-0 w-full h-full z-20 origin-left"
-      style={{
-        background: "linear-gradient(135deg, #5C3A1E 0%, #3D2010 100%)",
-        boxShadow: "2px 0 0 0 #2D1810, inset 1px 1px 0 0 #7A4E2E",
-        transformStyle: "preserve-3d",
-      }}
-      animate={{ rotateY: isOpen ? -160 : 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-    >
-      {/* Cover decoration */}
-      <div className="absolute inset-3 md:inset-4 border border-[#8B6914]/30 rounded-sm flex items-center justify-center">
-        <div className="text-center">
-          <QuillIcon />
-          <p className="font-pixel text-[6px] md:text-[7px] text-[#D4A537] mt-1">
-            Carta
-          </p>
-        </div>
-      </div>
-    </motion.div>
   )
 }
 
@@ -62,7 +43,7 @@ export default function BookAndQuill() {
           observer.disconnect()
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
@@ -70,7 +51,10 @@ export default function BookAndQuill() {
 
   useEffect(() => {
     if (!isVisible) return
-    const timer = setTimeout(() => setBookOpen(true), 400)
+    const timer = setTimeout(() => {
+      playPageFlipSound()
+      setBookOpen(true)
+    }, 350)
     return () => clearTimeout(timer)
   }, [isVisible])
 
@@ -86,7 +70,7 @@ export default function BookAndQuill() {
         clearInterval(interval)
         setIsDone(true)
       }
-    }, 20)
+    }, 18)
     return () => clearInterval(interval)
   }, [bookOpen])
 
@@ -94,113 +78,116 @@ export default function BookAndQuill() {
     <section
       id="carta"
       ref={sectionRef}
-      className="min-h-screen py-16 md:py-24 px-4 flex flex-col items-center justify-center"
-      style={{
-        background: "linear-gradient(180deg, #1a1a2e 0%, #2D1810 50%, #1a1a2e 100%)",
-      }}
+      className="relative min-h-screen py-24 md:py-36 px-4 flex flex-col items-center justify-center overflow-hidden bg-[#090810]"
     >
-      {/* Title */}
-      <motion.h2
-        className="font-pixel text-[11px] md:text-[13px] text-minecraft-gold text-center mb-10"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        [ Una carta para vos ]
-      </motion.h2>
+      {/* Header Badge & Title */}
+      <div className="text-center mb-12 md:mb-16 relative z-10">
+        <motion.div
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4A537]/10 border border-[#D4A537]/30 mb-3"
+          initial={{ opacity: 0, y: -10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <QuillIcon />
+          <span className="font-pixel text-[7px] md:text-[8px] text-[#FFD700] uppercase tracking-wider">
+            Desde el Corazón
+          </span>
+        </motion.div>
 
-      {/* Book */}
+        <motion.h2
+          className="font-pixel text-[15px] sm:text-[18px] md:text-[24px] text-transparent bg-clip-text bg-gradient-to-b from-[#FFF2B2] via-[#FFD700] to-[#C99700] text-center drop-shadow-sm"
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          Una Carta Para Vos
+        </motion.h2>
+      </div>
+
+      {/* 3D Grimoire Book Container */}
       <motion.div
-        className="relative w-full max-w-xl"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        className="relative w-full max-w-2xl z-10"
+        initial={{ opacity: 0, scale: 0.92, y: 30 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        style={{ perspective: 800 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{ perspective: 1200 }}
       >
-        <div className="relative min-h-[320px] md:min-h-[360px]">
-          {/* Book cover */}
-          <BookCover isOpen={bookOpen} />
+        <div className="relative min-h-[360px] md:min-h-[420px] rounded-2xl p-1 bg-gradient-to-r from-[#2c180e] to-[#1a0e08] shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(212,165,55,0.12)] border border-[#D4A537]/30">
+          {/* Leather Book Spine */}
+          <div className="absolute left-0 top-0 bottom-0 w-6 md:w-8 bg-gradient-to-r from-[#3d2012] via-[#522b18] to-[#2a140b] rounded-l-2xl shadow-inner border-r border-[#1a0d07] z-20 flex flex-col justify-around items-center py-6">
+            <div className="w-2.5 h-1 bg-[#D4A537]/60 rounded-full" />
+            <div className="w-2.5 h-1 bg-[#D4A537]/60 rounded-full" />
+            <div className="w-2.5 h-1 bg-[#D4A537]/60 rounded-full" />
+          </div>
 
-          {/* Book spine */}
-          <div
-            className="absolute left-0 top-0 bottom-0 w-4 md:w-5 bg-[#5C3A1E] z-10"
-            style={{
-              boxShadow: "2px 0 0 0 #3D2010, 3px 0 0 0 #2D1810, inset -1px 0 0 0 #7A4E2E",
-            }}
-          />
-
-          {/* Book top/bottom spine caps */}
-          <div
-            className="absolute -top-1 left-0 right-0 h-2 md:h-3 bg-[#5C3A1E] z-10"
-            style={{ boxShadow: "0 2px 0 0 #3D2010, 0 3px 0 0 #2D1810" }}
-          />
-          <div
-            className="absolute -bottom-1 left-0 right-0 h-2 md:h-3 bg-[#5C3A1E] z-10"
-            style={{ boxShadow: "0 -2px 0 0 #3D2010, 0 -3px 0 0 #2D1810" }}
-          />
-
-          {/* Paper pages */}
-          <div
-            className="relative ml-4 md:ml-5 p-5 md:p-6 min-h-[300px]"
-            style={{
-              background: "linear-gradient(135deg, #F5E6C8 0%, #EDD9A9 50%, #E8D0A0 100%)",
-              boxShadow:
-                "3px 0 0 0 #3D2010, 0 3px 0 0 #3D2010, -1px 0 0 0 #3D2010, 0 -1px 0 0 #3D2010, inset 0 0 40px rgba(139,90,43,0.15)",
-            }}
-          >
-            {/* Page lines */}
+          {/* Parchment Pages Area */}
+          <div className="relative ml-6 md:ml-8 p-6 sm:p-8 md:p-10 min-h-[350px] md:min-h-[410px] rounded-r-xl bg-gradient-to-br from-[#FAF3E0] via-[#F4E8CE] to-[#E9D7B5] shadow-inner text-[#2B1B10] flex flex-col justify-between">
+            {/* Subtle vintage paper texture lines */}
             <div
-              className="absolute inset-0 pointer-events-none opacity-20"
+              className="absolute inset-0 pointer-events-none opacity-25 rounded-r-xl"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(0deg, transparent, transparent 24px, #8B6914 24px, #8B6914 25px)",
-                backgroundPosition: "0 20px",
+                  "repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(139, 90, 43, 0.25) 27px, rgba(139, 90, 43, 0.25) 28px)",
+                backgroundPosition: "0 24px",
               }}
             />
 
-            {/* Quill decoration top-right */}
-            <div className="absolute top-3 right-3 opacity-30">
+            {/* Top decorative gold filigree */}
+            <div className="flex justify-between items-center pb-4 border-b border-[#8B6914]/20 relative z-10">
+              <span className="font-pixel text-[7px] text-[#8B6914] tracking-widest uppercase">
+                ✦ Carta de Amor ✦
+              </span>
               <QuillIcon />
             </div>
 
-            {/* Blinking cursor */}
-            <span
-              className="absolute -right-3 top-5 text-[#5C3A1E] font-pixel text-[10px] animate-pixel-blink"
-              style={{ display: isDone ? "none" : "block" }}
-            >
-              █
-            </span>
-
-            {/* Typewriter text */}
-            <pre
-              className="relative font-pixel text-[8px] md:text-[9px] leading-relaxed whitespace-pre-wrap tracking-wide"
-              style={{ color: "#2D1810", fontFamily: "inherit", wordBreak: "break-word" }}
-            >
-              {displayedText}
-            </pre>
-
-            {/* Signature hearts */}
-            {isDone && (
-              <motion.div
-                className="flex justify-center gap-2 mt-6"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+            {/* Letter text with graceful typography */}
+            <div className="my-6 relative z-10">
+              <pre
+                className="font-sans text-[14px] sm:text-[15px] md:text-[16px] leading-[1.85] whitespace-pre-wrap tracking-wide text-[#2B1B10] font-medium"
+                style={{ wordBreak: "break-word" }}
               >
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <motion.span
-                    key={i}
-                    className="font-pixel text-[11px] md:text-[13px]"
-                    style={{ color: i === 1 ? "#8B0000" : "#FF4D6D" }}
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
+                {displayedText}
+                {!isDone && (
+                  <span className="inline-block w-2 h-4 bg-[#8B5E3C] ml-1 animate-pulse align-middle" />
+                )}
+              </pre>
+            </div>
+
+            {/* Signature & Floating Hearts */}
+            <div className="pt-4 border-t border-[#8B6914]/20 flex items-center justify-between relative z-10">
+              <span className="font-pixel text-[8px] text-[#8B6914] tracking-wide">
+                Siempre tuyo, Tristán
+              </span>
+
+              <AnimatePresence>
+                {isDone && (
+                  <motion.div
+                    className="flex gap-2"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    ❤
-                  </motion.span>
-                ))}
-              </motion.div>
-            )}
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="text-lg md:text-xl text-[#FF4D6D] inline-block drop-shadow-sm"
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{
+                          duration: 1.4,
+                          repeat: Infinity,
+                          delay: i * 0.25,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        ❤️
+                      </motion.span>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </motion.div>

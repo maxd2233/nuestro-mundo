@@ -1,48 +1,14 @@
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { moments, finalMessage } from "../data/moments"
 import EnchantmentTable from "./EnchantmentTable"
 import PixelBanners from "./PixelBanners"
+import { playClickSound, playXpSound } from "../utils/audioEffects"
 
 const baseUrl = import.meta.env.BASE_URL
 
 function fullPhotoUrl(filename) {
   return `${baseUrl}photos/${filename}`
-}
-
-const cardVariants = {
-  offscreen: { opacity: 0, y: 40 },
-  onscreen: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.12,
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  }),
-}
-
-function PhotoBlock({ photos, alt, emoji, index }) {
-  const [error, setError] = useState(false)
-  const filename = photos?.[index ?? 0]
-  const src = filename ? fullPhotoUrl(filename) : null
-  return (
-    <div className="w-full h-full bg-[#3D3D3D] overflow-hidden">
-      {!error && src ? (
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-full object-cover"
-          onError={() => setError(true)}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-[#5C3A1E]">
-          <span className="text-3xl md:text-4xl">{emoji}</span>
-        </div>
-      )}
-    </div>
-  )
 }
 
 function Sparkles() {
@@ -73,130 +39,426 @@ function Sparkles() {
   )
 }
 
-export default function Gallery() {
+function PhotoCardImage({ photos, activeIndex, alt, emoji, onPhotoClick }) {
+  const [error, setError] = useState(false)
+  const filename = photos?.[activeIndex ?? 0]
+  const src = filename ? fullPhotoUrl(filename) : null
+
   return (
-    <section id="galeria" className="section-panel min-h-screen py-16 md:py-24 px-4">
-      {/* Section title with decorative blocks */}
-      <div className="flex items-center justify-center gap-2 md:gap-3 mb-12">
-        <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-stone" style={{ boxShadow: "1px 0 0 0 #5C5C5C, 0 1px 0 0 #5C5C5C, -1px 0 0 0 #5C5C5C, 0 -1px 0 0 #5C5C5C" }} />
-        <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-dirt" style={{ boxShadow: "1px 0 0 0 #6B4A0A, 0 1px 0 0 #6B4A0A, -1px 0 0 0 #6B4A0A, 0 -1px 0 0 #6B4A0A" }} />
+    <div
+      className="w-full h-full bg-[#111118] overflow-hidden cursor-zoom-in group-hover:scale-[1.02] transition-transform duration-500"
+      onClick={() => onPhotoClick(activeIndex ?? 0)}
+    >
+      {!error && src ? (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          className="w-full h-full object-cover transition-opacity duration-300"
+          onError={() => setError(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#1c120c] text-center p-4">
+          <span className="text-3xl md:text-4xl mb-2">{emoji}</span>
+          <span className="font-pixel text-[7px] text-[#C0C0D4]">{alt}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MomentCard({ moment, index, onOpenLightbox }) {
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0)
+  const cardRef = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const rotateX = ((y - centerY) / centerY) * -5
+    const rotateY = ((x - centerX) / centerX) * 5
+
+    setTilt({ x: rotateX, y: rotateY })
+  }
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 })
+  }
+
+  return (
+    <motion.article
+      layout
+      ref={cardRef}
+      className={`group relative rounded-xl overflow-hidden will-change-transform ${
+        moment.special ? "special-glow" : ""
+      }`}
+      initial={{ opacity: 0, y: 25, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        transition: "transform 0.15s ease-out",
+      }}
+    >
+      {/* Card container with crisp dark contrast */}
+      <div
+        className={`h-full flex flex-col justify-between rounded-xl overflow-hidden transition-all duration-300 ${
+          moment.special
+            ? "bg-[#1c140c] border-2 border-[#FFD700]/60 shadow-[0_8px_30px_rgba(212,165,55,0.25)]"
+            : "bg-[#14141e] border border-white/15 hover:border-[#D4A537]/60 shadow-xl"
+        }`}
+      >
+        {/* Main Photo Area (100% crisp, zero overlay haze) */}
+        <div className="w-full relative overflow-hidden" style={{ paddingBottom: "62%" }}>
+          <div className="absolute inset-0">
+            <PhotoCardImage
+              photos={moment.photos}
+              activeIndex={activePhotoIndex}
+              alt={moment.title}
+              emoji={moment.emoji}
+              onPhotoClick={(idx) => onOpenLightbox(moment, idx)}
+            />
+          </div>
+
+          {/* Floating heart badge for special moment */}
+          {moment.special && (
+            <div className="absolute top-2.5 right-2.5 float-heart z-20">
+              <div className="bg-[#120a06] rounded-md px-2.5 py-1 border border-[#FFD700] shadow-lg">
+                <span className="text-sm">💕</span>
+              </div>
+            </div>
+          )}
+
+          {/* Sparkles */}
+          {moment.special && <Sparkles />}
+
+          {/* Photo count indicator tag if multiple */}
+          {moment.photos.length > 1 && (
+            <div className="absolute bottom-2 right-2 z-20 bg-black/85 px-2 py-0.5 rounded text-[11px] font-sans font-medium text-white border border-white/20">
+              📷 {activePhotoIndex + 1}/{moment.photos.length}
+            </div>
+          )}
+        </div>
+
+        {/* Multi-photo thumbnail bar */}
+        {moment.photos.length > 1 && (
+          <div className="flex gap-1.5 px-3 pt-2.5 bg-[#0e0e16] border-b border-white/10">
+            {moment.photos.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  playClickSound()
+                  setActivePhotoIndex(idx)
+                }}
+                className={`flex-1 h-12 md:h-14 rounded overflow-hidden cursor-pointer transition-all duration-200 border ${
+                  activePhotoIndex === idx
+                    ? "border-[#FFD700] ring-2 ring-[#FFD700]/70 scale-[1.03]"
+                    : "border-white/15 opacity-70 hover:opacity-100"
+                }`}
+              >
+                <PhotoCardImage
+                  photos={moment.photos}
+                  activeIndex={idx}
+                  alt={moment.title}
+                  emoji={moment.emoji}
+                  onPhotoClick={() => setActivePhotoIndex(idx)}
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Content Details (Crystal Clear, High-Contrast Typography) */}
+        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between bg-[#14141e]">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <span className="inline-flex items-center gap-1 font-pixel text-[7.5px] md:text-[8.5px] text-[#78E08F] tracking-wide uppercase bg-[#78E08F]/15 px-2.5 py-1 rounded border border-[#78E08F]/40 font-bold">
+                <span>📅</span> {moment.date}
+              </span>
+              <span className="text-lg">{moment.emoji}</span>
+            </div>
+
+            <h3 className="font-pixel text-[10px] sm:text-[11px] md:text-[12px] text-[#FFD700] mb-2 leading-relaxed font-bold drop-shadow-sm">
+              {moment.title}
+            </h3>
+
+            <p className="font-sans text-[13.5px] sm:text-[14px] md:text-[14.5px] text-[#F0F0FA] leading-relaxed tracking-normal font-medium">
+              {moment.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  )
+}
+
+function PhotoLightbox({ current, onClose, onPrev, onNext }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose()
+      if (e.key === "ArrowLeft") onPrev()
+      if (e.key === "ArrowRight") onNext()
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onClose, onPrev, onNext])
+
+  if (!current) return null
+  const { moment, photoIndex } = current
+  const filename = moment.photos[photoIndex]
+  const src = fullPhotoUrl(filename)
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 p-4 md:p-8 select-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 md:top-6 md:right-6 z-50 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white text-xl transition-colors cursor-pointer border border-white/30"
+        aria-label="Cerrar visor"
+      >
+        ✕
+      </button>
+
+      {moment.photos.length > 1 && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              playClickSound()
+              onPrev()
+            }}
+            className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white text-2xl transition-colors cursor-pointer border border-white/30 shadow-xl"
+            aria-label="Foto anterior"
+          >
+            ‹
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              playClickSound()
+              onNext()
+            }}
+            className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white text-2xl transition-colors cursor-pointer border border-white/30 shadow-xl"
+            aria-label="Foto siguiente"
+          >
+            ›
+          </button>
+        </>
+      )}
+
+      <motion.div
+        className="relative max-w-4xl max-h-[85vh] flex flex-col items-center"
+        initial={{ scale: 0.92, y: 15 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.92, opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative rounded-lg overflow-hidden border border-white/20 shadow-2xl bg-[#090912] max-h-[70vh] flex items-center justify-center">
+          <img
+            src={src}
+            alt={moment.title}
+            className="max-h-[70vh] max-w-full object-contain rounded"
+          />
+        </div>
+
+        <div className="mt-3.5 text-center max-w-lg">
+          <p className="font-pixel text-[10px] md:text-[12px] text-[#FFD700] mb-1 font-bold">
+            {moment.title}
+          </p>
+          <p className="font-sans text-[13px] md:text-[14px] text-[#E0E0F0] font-medium">
+            {moment.date} &bull; Foto {photoIndex + 1} de {moment.photos.length}
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+const filterTabs = [
+  { id: "all", label: "Todos", icon: "✨" },
+  { id: "special", label: "Especiales", icon: "💕" },
+  { id: "dates", label: "Citas & Salidas", icon: "🍦" },
+  { id: "family", label: "En Familia", icon: "🏠" },
+]
+
+export default function Gallery() {
+  const [activeTab, setActiveTab] = useState("all")
+  const [lightboxState, setLightboxState] = useState(null)
+
+  const filteredMoments = useMemo(() => {
+    if (activeTab === "special") {
+      return moments.filter((m) => m.special)
+    }
+    if (activeTab === "dates") {
+      return moments.filter(
+        (m) =>
+          m.title.toLowerCase().includes("cita") ||
+          m.title.toLowerCase().includes("mate") ||
+          m.title.toLowerCase().includes("merienda") ||
+          m.title.toLowerCase().includes("plaza")
+      )
+    }
+    if (activeTab === "family") {
+      return moments.filter(
+        (m) =>
+          m.description.toLowerCase().includes("flia") ||
+          m.description.toLowerCase().includes("familia") ||
+          m.description.toLowerCase().includes("amiga") ||
+          m.title.toLowerCase().includes("casa")
+      )
+    }
+    return moments
+  }, [activeTab])
+
+  const handleOpenLightbox = (moment, photoIndex) => {
+    if (moment.special) {
+      playXpSound()
+    } else {
+      playClickSound()
+    }
+    setLightboxState({ moment, photoIndex })
+  }
+
+  const handleCloseLightbox = () => {
+    setLightboxState(null)
+  }
+
+  const handlePrevPhoto = useCallback(() => {
+    if (!lightboxState) return
+    const { moment, photoIndex } = lightboxState
+    const nextIdx = photoIndex > 0 ? photoIndex - 1 : moment.photos.length - 1
+    setLightboxState({ moment, photoIndex: nextIdx })
+  }, [lightboxState])
+
+  const handleNextPhoto = useCallback(() => {
+    if (!lightboxState) return
+    const { moment, photoIndex } = lightboxState
+    const nextIdx = photoIndex < moment.photos.length - 1 ? photoIndex + 1 : 0
+    setLightboxState({ moment, photoIndex: nextIdx })
+  }, [lightboxState])
+
+  return (
+    <section id="galeria" className="relative min-h-screen py-20 md:py-28 px-4 md:px-8 bg-[#090912]">
+      {/* Section Header */}
+      <div className="max-w-3xl mx-auto text-center mb-10 md:mb-14">
+        <motion.div
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4A537]/15 border border-[#D4A537]/40 mb-4"
+          initial={{ opacity: 0, y: -10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <span className="text-xs">✨</span>
+          <span className="font-pixel text-[7px] md:text-[8px] text-[#FFD700] uppercase tracking-wider font-bold">
+            Nuestros Recuerdos
+          </span>
+          <span className="text-xs">✨</span>
+        </motion.div>
+
         <motion.h2
-          className="font-pixel text-[11px] md:text-[13px] text-minecraft-gold text-center"
+          className="font-pixel text-[17px] sm:text-[21px] md:text-[28px] text-[#FFD700] text-center mb-4 leading-relaxed font-bold drop-shadow-[0_2px_10px_rgba(255,215,0,0.3)]"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          Momentos Inolvidables
+        </motion.h2>
+
+        <motion.p
+          className="font-sans text-[15px] md:text-[16px] text-[#E0E0F0] max-w-lg mx-auto font-medium leading-relaxed mb-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.8 }}
         >
-          [ Momentos ]
-        </motion.h2>
-        <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-dirt" style={{ boxShadow: "1px 0 0 0 #6B4A0A, 0 1px 0 0 #6B4A0A, -1px 0 0 0 #6B4A0A, 0 -1px 0 0 #6B4A0A" }} />
-        <div className="w-4 h-4 md:w-5 md:h-5 bg-minecraft-stone" style={{ boxShadow: "1px 0 0 0 #5C5C5C, 0 1px 0 0 #5C5C5C, -1px 0 0 0 #5C5C5C, 0 -1px 0 0 #5C5C5C" }} />
+          Cada capítulo de nuestra historia juntos, guardado para siempre.
+        </motion.p>
+
+        {/* Inventory Filter Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 max-w-xl mx-auto">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                playClickSound()
+                setActiveTab(tab.id)
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-pixel text-[7.5px] md:text-[8.5px] transition-all duration-200 cursor-pointer ${
+                activeTab === tab.id
+                  ? "bg-[#D4A537]/30 border-2 border-[#FFD700] text-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.35)] scale-[1.03] font-bold"
+                  : "bg-[#18121f] border border-white/20 text-[#D0D0E4] hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+              {tab.id === "all" && <span className="opacity-75">({moments.length})</span>}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Pixel banners */}
+      {/* Pixel Banners */}
       <PixelBanners />
 
-      {/* Grid: 2 cols mobile, 3 desktop */}
-      <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {moments.map((moment, i) => (
-          <motion.article
-            key={moment.id}
-            className={`group cursor-default relative ${moment.special ? "special-glow" : ""}`}
-            variants={cardVariants}
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.2 }}
-            custom={i}
-          >
-            {/* Inventory slot card */}
-            <div
-              className="bg-[#1D1D1D] overflow-hidden transition-all duration-300 group-hover:-translate-y-1"
-              style={{
-                boxShadow: moment.special
-                  ? undefined
-                  : "3px 0 0 0 #2D2D2D, 0 3px 0 0 #2D2D2D, -3px 0 0 0 #2D2D2D, 0 -3px 0 0 #2D2D2D, 2px 1px 0 0 #2D2D2D, 1px 2px 0 0 #2D2D2D, -2px 1px 0 0 #2D2D2D, -1px 2px 0 0 #2D2D2D, 2px -1px 0 0 #2D2D2D, 1px -2px 0 0 #2D2D2D, -2px -1px 0 0 #2D2D2D, -1px -2px 0 0 #2D2D2D, inset 1px 1px 0 0 #4A4A4A, inset -1px -1px 0 0 #111",
-              }}
-            >
-              {/* Photo area: 60% of card height */}
-              <div className="w-full relative" style={{ paddingBottom: "60%" }}>
-                <div className="absolute inset-0">
-                  <PhotoBlock photos={moment.photos} alt={moment.title} emoji={moment.emoji} />
-                </div>
-
-                {/* Floating heart badge for special moment */}
-                {moment.special && (
-                  <div className="absolute top-2 right-2 float-heart z-10">
-                    <div className="bg-[#1D1D1D]/80 rounded-sm px-1.5 py-1" style={{ boxShadow: "1px 0 0 0 #2D2D2D, 0 1px 0 0 #2D2D2D, -1px 0 0 0 #2D2D2D, 0 -1px 0 0 #2D2D2D" }}>
-                      <span className="text-sm md:text-base">💕</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sparkle particles for special moment */}
-                {moment.special && <Sparkles />}
-              </div>
-
-              {/* Secondary photo thumbnails */}
-              {moment.photos.length > 1 && (
-                <div className="flex gap-1 px-2.5 md:px-3 pt-2">
-                  {moment.photos.map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="flex-1 h-16 md:h-20 overflow-hidden"
-                      style={{
-                        boxShadow: "1px 0 0 0 #2D2D2D, 0 1px 0 0 #2D2D2D, -1px 0 0 0 #2D2D2D, 0 -1px 0 0 #2D2D2D",
-                      }}
-                    >
-                      <PhotoBlock photos={moment.photos} alt={moment.title} emoji={moment.emoji} index={idx} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Info area */}
-              <div className="p-2.5 md:p-3">
-                <p className="font-pixel text-[7px] md:text-[8px] text-minecraft-grass mb-1.5 leading-relaxed">
-                  {moment.date}
-                </p>
-                <h3 className="font-pixel text-[8px] md:text-[10px] text-[#E8D5B7] mb-1 leading-relaxed">
-                  {moment.title}
-                </h3>
-                <p className="font-pixel text-[6px] md:text-[7px] text-minecraft-stone leading-relaxed opacity-80">
-                  {moment.description}
-                </p>
-              </div>
-            </div>
-
-            {/* Hover gold glow */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{
-                boxShadow:
-                  "0 0 12px rgba(255,215,0,0.3), 0 0 0 1px rgba(255,215,0,0.15)",
-              }}
+      {/* Moments Grid: 1 col mobile, 2 tablet, 3 desktop */}
+      <motion.div
+        layout
+        className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+      >
+        <AnimatePresence>
+          {filteredMoments.map((moment, i) => (
+            <MomentCard
+              key={moment.id}
+              moment={moment}
+              index={i}
+              onOpenLightbox={handleOpenLightbox}
             />
-          </motion.article>
-        ))}
-      </div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
-      {/* Enchantment table decoration */}
+      {/* Enchantment Table in the middle of journey */}
       <EnchantmentTable />
 
-      {/* Final message */}
+      {/* Final message placard */}
       <motion.div
-        className="max-w-xl mx-auto mt-12 md:mt-16 p-4 md:p-5 bg-minecraft-dark text-center"
-        initial={{ opacity: 0, y: 20 }}
+        className="max-w-2xl mx-auto mt-16 md:mt-24 p-7 md:p-9 rounded-2xl bg-[#1c1208] border-2 border-[#D4A537] shadow-[0_16px_40px_rgba(0,0,0,0.9),0_0_30px_rgba(212,165,55,0.2)] text-center relative overflow-hidden"
+        initial={{ opacity: 0, y: 25 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        style={{
-          boxShadow:
-            "2px 0 0 0 #5C3A1E, 0 2px 0 0 #5C3A1E, -2px 0 0 0 #5C3A1E, 0 -2px 0 0 #5C3A1E, 1px 1px 0 0 #5C3A1E, -1px -1px 0 0 #5C3A1E, 1px -1px 0 0 #5C3A1E, -1px 1px 0 0 #5C3A1E, inset 1px 1px 0 0 #7A4E2E, inset -1px -1px 0 0 #1a0a05",
-        }}
+        transition={{ duration: 0.8 }}
       >
-        <p className="font-pixel text-[7px] md:text-[8px] text-[#E8D5B7] leading-relaxed">
-          {finalMessage}
+        <div className="text-3xl md:text-4xl mb-3">💌</div>
+        <p className="font-sans text-[15px] md:text-[16.5px] text-[#FFF2D0] leading-relaxed font-semibold mb-3">
+          "{finalMessage}"
         </p>
       </motion.div>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxState && (
+          <PhotoLightbox
+            current={lightboxState}
+            onClose={handleCloseLightbox}
+            onPrev={handlePrevPhoto}
+            onNext={handleNextPhoto}
+          />
+        )}
+      </AnimatePresence>
     </section>
   )
 }

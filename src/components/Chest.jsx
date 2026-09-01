@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import Hero3DScene from "./Hero3DScene"
 import MinecraftChest from "./MinecraftChest"
+import ErrorBoundary from "./ErrorBoundary"
 import RelationshipClock from "./RelationshipClock"
 import DiamondEasterEgg from "./DiamondEasterEgg"
 import FloatingHearts from "./FloatingHearts"
@@ -8,20 +10,20 @@ import TorchBorder from "./TorchBorder"
 import HiddenCreeper from "./HiddenCreeper"
 import SnowBiome from "./SnowBiome"
 
-const stars = Array.from({ length: 40 }, (_, i) => ({
+const stars = Array.from({ length: 45 }, (_, i) => ({
   id: i,
   left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 60}%`,
+  top: `${Math.random() * 70}%`,
   size: Math.random() > 0.7 ? 3 : 2,
   delay: Math.random() * 4,
-  duration: 1.5 + Math.random() * 2,
+  duration: 1.5 + Math.random() * 2.5,
 }))
 
-const sparklePositions = Array.from({ length: 12 }, () => ({
-  x: `${-30 + Math.random() * 60}px`,
-  y: `${-30 + Math.random() * 60}px`,
-  delay: Math.random() * 0.4,
-  size: 3 + Math.random() * 4,
+const sparklePositions = Array.from({ length: 16 }, () => ({
+  x: `${-40 + Math.random() * 80}px`,
+  y: `${-40 + Math.random() * 80}px`,
+  delay: Math.random() * 0.5,
+  size: 3 + Math.random() * 5,
 }))
 
 export default function Chest({ onOpen }) {
@@ -37,16 +39,16 @@ export default function Chest({ onOpen }) {
   }
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 bg-[#0a0a1a]">
+    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden bg-[#06060f] pt-12 pb-16">
       {/* Snow biome overlay */}
       <SnowBiome />
 
-      {/* Stars background */}
+      {/* Stars background with subtle depth */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {stars.map((star) => (
           <div
             key={star.id}
-            className="absolute rounded-full bg-white"
+            className="absolute rounded-full bg-white will-change-opacity"
             style={{
               left: star.left,
               top: star.top,
@@ -54,7 +56,7 @@ export default function Chest({ onOpen }) {
               height: star.size,
               opacity: 0,
               animation: `pixel-blink ${star.duration}s ease-in-out ${star.delay}s infinite`,
-              boxShadow: star.size > 2 ? "0 0 4px rgba(255,255,255,0.6)" : "none",
+              boxShadow: star.size > 2 ? "0 0 6px rgba(255,255,255,0.8)" : "none",
             }}
           />
         ))}
@@ -63,32 +65,54 @@ export default function Chest({ onOpen }) {
       {/* Hidden creeper easter egg */}
       <HiddenCreeper />
 
-      {/* Torch borders */}
+      {/* Torch borders with dynamic lighting */}
       <TorchBorder />
 
-      {/* Title */}
-      <motion.h1
-        className="font-pixel text-[12px] md:text-[16px] text-minecraft-gold mb-4 text-center leading-relaxed relative z-10"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-      >
-        Nuestro Mundo
-      </motion.h1>
+      {/* Header text container */}
+      <div className="relative z-10 flex flex-col items-center text-center max-w-xl mx-auto mb-2">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: -25 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full border border-[#D4A537]/30 bg-[#1a140d]/60 backdrop-blur-md"
+        >
+          <span className="w-2 h-2 rounded-full bg-[#5ED9D1] animate-pulse" />
+          <span className="font-pixel text-[6px] md:text-[7px] text-[#D4A537] tracking-wider uppercase">
+            Nuestra Aventura Juntos
+          </span>
+        </motion.div>
 
-      {/* Blinking subtext */}
-      <motion.p
-        className="font-pixel text-[7px] md:text-[9px] text-minecraft-stone mb-10 text-center relative z-10 animate-pixel-blink"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 1 }}
-      >
-        [ toca el baúl para abrirlo ]
-      </motion.p>
+        <motion.h1
+          className="font-pixel text-[15px] sm:text-[18px] md:text-[24px] text-transparent bg-clip-text bg-gradient-to-b from-[#FFF2B2] via-[#FFD700] to-[#C99700] mb-3 text-center leading-relaxed tracking-wider drop-shadow-[0_4px_12px_rgba(255,215,0,0.25)]"
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
+        >
+          Nuestro Mundo
+        </motion.h1>
 
-      {/* Minecraft Chest */}
-      <div className="relative z-10">
-        <MinecraftChest onOpen={handleChestOpen} />
+        {/* Blinking subtext */}
+        <motion.p
+          className="font-pixel text-[7px] md:text-[9px] text-[#A0A0B2] text-center animate-pixel-blink tracking-wide"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 1 }}
+        >
+          [ toca o haz clic en el baúl para abrirlo ]
+        </motion.p>
+      </div>
+
+      {/* 3D WebGL Chest Scene with resilient fallback */}
+      <div className="relative z-10 w-full max-w-3xl h-[360px] sm:h-[420px] md:h-[480px] flex items-center justify-center">
+        <ErrorBoundary
+          fallback={
+            <div className="py-12">
+              <MinecraftChest onOpen={handleChestOpen} />
+            </div>
+          }
+        >
+          <Hero3DScene isOpen={isOpen} onOpenChest={handleChestOpen} />
+        </ErrorBoundary>
       </div>
 
       {/* Floating hearts on open */}
@@ -105,54 +129,60 @@ export default function Chest({ onOpen }) {
                 initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                 animate={{
                   opacity: [0, 1, 0.8, 0],
-                  scale: [0, 1, 0.5, 0],
+                  scale: [0, 1.2, 0.6, 0],
                   x: sp.x,
                   y: sp.y,
                 }}
                 exit={{ opacity: 0, scale: 0 }}
-                transition={{ duration: 0.9, delay: sp.delay, ease: "easeOut" }}
-                style={{ left: "50%", top: "50%" }}
+                transition={{ duration: 1.1, delay: sp.delay, ease: "easeOut" }}
+                style={{ left: "50%", top: "45%" }}
               >
                 <div
-                  className="bg-minecraft-gold"
+                  className="bg-[#FFD700] shadow-[0_0_8px_#FFD700]"
                   style={{
                     width: sp.size,
                     height: sp.size,
-                    clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+                    clipPath:
+                      "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
                   }}
                 />
               </motion.div>
             ))}
 
-            {/* "Bienvenido" message */}
+            {/* "Bienvenido" cinematic banner */}
             <motion.div
-              className="mt-10 text-center relative z-10"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-center relative z-20"
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
             >
-              <p className="font-pixel text-[9px] md:text-[11px] text-minecraft-gold mb-4 leading-relaxed">
-                Bienvenido a nuestro mundo, mi amor
-              </p>
+              <div className="inline-block px-5 py-2.5 rounded-lg bg-[#1a140d]/80 border border-[#D4A537]/50 backdrop-blur-md shadow-[0_8px_24px_rgba(212,165,55,0.25)]">
+                <p className="font-pixel text-[8px] sm:text-[10px] md:text-[12px] text-[#FFD700] leading-relaxed">
+                  Bienvenido a nuestro mundo, mi amor 💕
+                </p>
+              </div>
               <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
+                animate={{ y: [0, 6, 0] }}
+                transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                className="mt-3"
               >
-                <span className="text-2xl md:text-3xl inline-block">⬇</span>
+                <span className="text-[#FFD700] text-xl md:text-2xl inline-block drop-shadow-[0_0_8px_#FFD700]">
+                  ↓
+                </span>
               </motion.div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Relationship clock hanging from the chest */}
-      <div className="relative z-10 mt-4">
+      {/* Relationship clock */}
+      <div className="relative z-10 mt-6">
         <RelationshipClock />
       </div>
 
       {/* Diamond easter egg – bottom-right corner */}
-      <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-10">
+      <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-20">
         <DiamondEasterEgg />
       </div>
     </section>

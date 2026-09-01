@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
-// Fecha de inicio: 16 de abril de 2026
-const START_DATE = new Date(2026, 3, 16, 0, 0, 0) // mes 3 = abril (0-indexed)
+// Start date: 16 de abril de 2026
+const START_DATE = new Date(2026, 3, 16, 0, 0, 0) // Month 3 = abril (0-indexed)
 
 function calcElapsed(start, now) {
   let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth())
@@ -27,11 +27,9 @@ function calcElapsed(start, now) {
   return { months, days, hours, minutes, seconds }
 }
 
-// Reloj de arena pixel-art, 12x14, dibujado a bloques (sin imagen externa)
 function PixelHourglass() {
-  const gold = "#D4A537"
+  const gold = "#FFD700"
   const wood = "#4A2F18"
-  // filas del reloj de arena (1 = madera/marco, 2 = arena dorada, 0 = vacio)
   const grid = [
     [1, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 2, 1],
@@ -44,7 +42,7 @@ function PixelHourglass() {
   ]
   const size = 3
   return (
-    <svg width={6 * size} height={8 * size} className="inline-block align-middle">
+    <svg width={6 * size} height={8 * size} className="inline-block align-middle drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]">
       {grid.map((row, y) =>
         row.map((cell, x) =>
           cell === 0 ? null : (
@@ -65,14 +63,14 @@ function PixelHourglass() {
 
 function TimeUnit({ value, label }) {
   return (
-    <div className="flex flex-col items-center min-w-[42px] md:min-w-[54px]">
+    <div className="flex flex-col items-center min-w-[46px] md:min-w-[58px] px-2 py-1 rounded bg-[#0f0b07]/50 border border-[#D4A537]/20">
       <span
-        className="font-pixel text-[13px] md:text-[17px] text-minecraft-gold tabular-nums"
-        style={{ textShadow: "0 0 6px rgba(212,165,55,0.5)" }}
+        className="font-pixel text-[13px] md:text-[16px] text-transparent bg-clip-text bg-gradient-to-b from-[#FFF5C0] to-[#FFD700] tabular-nums"
+        style={{ textShadow: "0 0 10px rgba(255,215,0,0.4)" }}
       >
         {String(value).padStart(2, "0")}
       </span>
-      <span className="font-pixel text-[6px] md:text-[7px] text-[#B9A88A] mt-1 tracking-wide">
+      <span className="font-pixel text-[6px] md:text-[7px] text-[#C2B299] mt-1 tracking-wider uppercase opacity-90">
         {label}
       </span>
     </div>
@@ -91,42 +89,41 @@ export default function RelationshipClock() {
 
   return (
     <motion.div
-      className="flex flex-col items-center mt-2 md:mt-4"
-      initial={{ opacity: 0, y: -10 }}
+      className="flex flex-col items-center"
+      initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.4 }}
+      transition={{ duration: 0.8, delay: 0.3 }}
     >
-      {/* Cadenas que cuelgan del cofre */}
-      <div className="flex gap-10 md:gap-14 -mb-1">
-        <div className="w-[2px] h-4 md:h-5 bg-[#6B6B6B]" />
-        <div className="w-[2px] h-4 md:h-5 bg-[#6B6B6B]" />
+      {/* Hanging chain links */}
+      <div className="flex gap-14 md:gap-20 -mb-1">
+        <div className="w-[3px] h-5 bg-gradient-to-b from-[#8B6914] to-[#4A2F18] shadow-[0_0_4px_rgba(0,0,0,0.6)]" />
+        <div className="w-[3px] h-5 bg-gradient-to-b from-[#8B6914] to-[#4A2F18] shadow-[0_0_4px_rgba(0,0,0,0.6)]" />
       </div>
 
-      {/* Cartel de madera */}
+      {/* Crafted wooden placard with gold borders */}
       <div
-        className="relative bg-[#5C3A1E] rounded-sm px-4 py-3 md:px-5 md:py-4"
-        style={{
-          boxShadow:
-            "2px 0 0 0 #3D2712, 0 2px 0 0 #3D2712, -2px 0 0 0 #3D2712, 0 -2px 0 0 #3D2712, " +
-            "1px 1px 0 0 #3D2712, -1px -1px 0 0 #3D2712, 1px -1px 0 0 #3D2712, -1px 1px 0 0 #3D2712, " +
-            "inset 1px 1px 0 0 #7A4E2E, inset -1px -1px 0 0 #1a0a05",
-        }}
+        className="relative bg-gradient-to-b from-[#3a2211] to-[#24150b] rounded-lg px-5 py-3.5 md:px-7 md:py-4.5 border border-[#D4A537]/40 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.6),0_0_24px_rgba(212,165,55,0.15)]"
       >
-        {/* Clavos en las esquinas, detalle de cartel de madera */}
-        <div className="absolute top-1 left-1 w-1 h-1 bg-[#2A1A0D] rounded-full" />
-        <div className="absolute top-1 right-1 w-1 h-1 bg-[#2A1A0D] rounded-full" />
-        <div className="absolute bottom-1 left-1 w-1 h-1 bg-[#2A1A0D] rounded-full" />
-        <div className="absolute bottom-1 right-1 w-1 h-1 bg-[#2A1A0D] rounded-full" />
+        {/* Corner rivets */}
+        <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 bg-[#FFD700] rounded-full shadow-[0_0_4px_#FFD700]" />
+        <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FFD700] rounded-full shadow-[0_0_4px_#FFD700]" />
+        <div className="absolute bottom-1.5 left-1.5 w-1.5 h-1.5 bg-[#FFD700] rounded-full shadow-[0_0_4px_#FFD700]" />
+        <div className="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 bg-[#FFD700] rounded-full shadow-[0_0_4px_#FFD700]" />
 
-        <p className="font-pixel text-[7px] md:text-[8px] text-minecraft-grass text-center mb-2 tracking-wide flex items-center justify-center gap-1.5">
+        <div className="flex items-center justify-center gap-2 mb-2.5">
           <PixelHourglass />
-          Juntos hace
-        </p>
-        <div className="flex gap-3 md:gap-4 justify-center">
+          <p className="font-pixel text-[7px] md:text-[8px] text-[#78E08F] tracking-wider uppercase">
+            Juntos hace
+          </p>
+        </div>
+
+        <div className="flex gap-2.5 md:gap-3.5 justify-center">
           <TimeUnit value={elapsed.months} label="meses" />
-          <TimeUnit value={elapsed.days} label="dias" />
+          <TimeUnit value={elapsed.days} label="días" />
           <TimeUnit value={elapsed.hours} label="horas" />
+          <TimeUnit value={elapsed.minutes} label="min" />
+          <TimeUnit value={elapsed.seconds} label="seg" />
         </div>
       </div>
     </motion.div>
